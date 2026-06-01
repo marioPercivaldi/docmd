@@ -1,0 +1,11 @@
+{
+  "name": "docmd",
+  "version": "1.0.0",
+  "description": "Convert file attachments (PDF, DOCX, PPTX, XLSX, images, audio, CSV, JSON, XML, HTML, EPUB) to Markdown before Claude reads them, optimizing token usage via Microsoft MarkItDown.",
+  "author": {
+    "name": "Mario Percivaldi",
+    "url": "https://github.com/mariopercivaldi/docmd"
+  },
+  "homepage": "https://github.com/mariopercivaldi/docmd",
+  "license": "MIT"
+}

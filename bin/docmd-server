@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# docmd-server — launches the MarkItDown MCP server, installing dependencies if needed.
+set -euo pipefail
+
+PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VENV_DIR="${PLUGIN_ROOT}/.venv"
+SERVER="${PLUGIN_ROOT}/server/server.py"
+REQUIREMENTS="${PLUGIN_ROOT}/server/requirements.txt"
+
+# Bootstrap venv on first run
+if [ ! -f "${VENV_DIR}/bin/python" ]; then
+  echo "[docmd] Setting up Python environment..." >&2
+  python3 -m venv "${VENV_DIR}" >&2
+  "${VENV_DIR}/bin/pip" install --quiet --upgrade pip >&2
+  "${VENV_DIR}/bin/pip" install --quiet -r "${REQUIREMENTS}" >&2
+  echo "[docmd] Ready." >&2
+fi
+
+exec "${VENV_DIR}/bin/python" "${SERVER}" "$@"

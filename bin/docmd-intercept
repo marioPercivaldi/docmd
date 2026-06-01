@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# docmd-intercept — PreToolUse hook that intercepts Read calls on supported file types.
+# Reads tool input JSON from stdin, converts the file to Markdown if supported,
+# and exits with code 2 to block the original Read and return the Markdown to Claude.
+# Exits with code 0 to let unsupported files pass through normally.
+
+PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VENV_DIR="${PLUGIN_ROOT}/.venv"
+
+SUPPORTED_EXTENSIONS="pdf docx doc pptx ppt xlsx xls csv json xml html htm jpg jpeg png gif webp bmp tiff mp3 wav m4a zip epub"
+
+# Read JSON input from stdin
+INPUT="$(cat)"
+FILE_PATH="$(echo "${INPUT}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('file_path',''))" 2>/dev/null || true)"
+
+if [ -z "${FILE_PATH}" ]; then
+  exit 0
+fi
+
+# Resolve extension (lowercase, no dot)
+EXT="${FILE_PATH##*.}"
+EXT="$(echo "${EXT}" | tr '[:upper:]' '[:lower:]')"
+
+# Check if extension is supported
+MATCH=0
+for SUPPORTED in ${SUPPORTED_EXTENSIONS}; do
+  if [ "${EXT}" = "${SUPPORTED}" ]; then
+    MATCH=1
+    break
+  fi
+done
+
+if [ "${MATCH}" -eq 0 ]; then
+  exit 0
+fi
+
+# Ensure venv exists (may not be ready if MCP server hasn't been started)
+if [ ! -f "${VENV_DIR}/bin/python" ]; then
+  exit 0
+fi
+
+# Convert to Markdown
+RESULT="$("${VENV_DIR}/bin/python" -c "
+from markitdown import MarkItDown
+import sys
+md = MarkItDown()
+try:
+    r = md.convert(sys.argv[1])
+    print(r.text_content or '(empty content)')
+except Exception as e:
+    print(f'docmd conversion error: {e}', file=sys.stderr)
+    sys.exit(0)
+" "${FILE_PATH}" 2>/dev/null)"
+
+RC=$?
+if [ ${RC} -ne 0 ] || [ -z "${RESULT}" ]; then
+  exit 0
+fi
+
+# Print Markdown and block the original Read (exit 2 signals Claude to use this output)
+printf '%s' "${RESULT}"
+exit 2
