@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "docmd": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/bin/docmd-server",
+      "args": []
+    }
+  }
+}
