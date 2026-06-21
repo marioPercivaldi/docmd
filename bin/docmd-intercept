@@ -34,6 +34,15 @@ if [ "${MATCH}" -eq 0 ]; then
   exit 0
 fi
 
+# Audio files should be processed via the MCP tool (Whisper model is kept in memory there)
+AUDIO_EXTENSIONS="mp3 wav m4a"
+for AUDIO_EXT in ${AUDIO_EXTENSIONS}; do
+  if [ "${EXT}" = "${AUDIO_EXT}" ]; then
+    printf 'This is an audio file. Use the docmd__convert_to_markdown MCP tool to transcribe it:\n\ndocmd__convert_to_markdown(file_path="%s")' "${FILE_PATH}"
+    exit 2
+  fi
+done
+
 # Ensure venv exists (may not be ready if MCP server hasn't been started)
 if [ ! -f "${VENV_DIR}/bin/python" ]; then
   exit 0

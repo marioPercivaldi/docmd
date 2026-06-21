@@ -26,6 +26,12 @@ PDF, DOCX, DOC, PPTX, PPT, XLSX, XLS, CSV, JSON, XML, HTML, JPEG, JPG, PNG, GIF,
 - "what's in this presentation"
 - "process this file: path/to/file.docx"
 
+## Audio transcription
+
+Audio files (MP3, WAV, M4A) are transcribed locally using [OpenAI Whisper](https://github.com/openai/whisper). The model runs entirely on your machine — no API key required. The model size is configurable via the `DOCMD_WHISPER_MODEL` environment variable (default: `base`). Options: `tiny`, `base`, `small`, `medium`, `large`.
+
+**Requires `ffmpeg` installed on your system** (`brew install ffmpeg` on macOS).
+
 ## Token optimization rationale
 
 Raw binary files passed to the Read tool either fail or consume tokens inefficiently. MarkItDown converts them to clean, structured Markdown that preserves headings, tables, lists, and key content while minimizing token consumption by 40–80% compared to alternative extraction approaches.
